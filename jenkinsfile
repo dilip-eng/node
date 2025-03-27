@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/dilip-eng/node.git'
+            }
+        }
+        stage('Build Image') {
+            steps {
+                script {
+                    def imageName = "app-image-${BUILD_NUMBER}"
+                    sh "docker build -t ${imageName} ."
+                }
+            }
+        }
+        stage('Run Container') {
+            steps {
+                script {
+                    def imageName = "app-image-${BUILD_NUMBER}"
+                    def containerName = "app-container-${BUILD_NUMBER}"
+                    sh """
+                    docker run -d --name ${containerName} -P ${imageName}
+                    """
+                }
+            }
+        }
+    }
+}
